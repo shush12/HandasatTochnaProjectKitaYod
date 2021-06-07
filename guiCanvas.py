@@ -1,7 +1,8 @@
 from tkinter import *
 from time import sleep
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 from main import *
+import cv2
 
 class GUI:
     def __init__(self, n = 100):
@@ -88,13 +89,16 @@ class GUI:
     def makeAGuess(self):
         img_arr = np.asarray(self.image.resize((28, 28)).convert('L')) / 255.
         new_image = np.zeros(img_arr.shape)  
-        for i in range(img_arr.shape[0]):
-            for j in range(img_arr.shape[1]):
-                new_image[i, j] = img_arr[i, j] ** (1 / float(10))
-        
+        new_image = img_arr ** (1 / float(10))
+
+        # new_image = cv2.imread()
+        # new_image = cv2.erode(new_image, np.ones((5, 5), np.uint8), iterations=1)
+
+        # cv2.imshow('Erosion', new_image)
+
         # plt.imshow(new_image)
         # plt.show()
-
+        
         if self.UseClassifier == "KNN":
             return self.KnnClassifier.Predict(new_image)
         elif self.UseClassifier == "NN":
