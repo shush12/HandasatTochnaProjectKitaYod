@@ -82,25 +82,23 @@ class GUI:
         self.draw = ImageDraw.Draw(self.image)
 
     def predict(self):
-        self.image.save("Original.png", 'png')
+        self.image.save("Number.png", 'png')
         guess = self.makeAGuess()
         self.lab['text'] = "Prediction: " + str(guess) 
 
     def makeAGuess(self):
+        new_image = cv2.imread('Number.png')
+        new_image = cv2.dilate(new_image, np.ones((5, 5), np.uint8), iterations=1)
+        new_image = cv2.resize(new_image, (28, 28))
+        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
+        # cv2.imshow('What the alorithm sees', new_image)
+
         img_arr = np.asarray(self.image.resize((28, 28)).convert('L')) / 255.
-        new_image = np.zeros(img_arr.shape)  
-        new_image = img_arr ** (1 / float(10))
+        new_image1 = np.zeros(img_arr.shape)  
+        new_image1 = img_arr ** (1 / float(10))
 
-        # new_image = cv2.imread()
-        # new_image = cv2.erode(new_image, np.ones((5, 5), np.uint8), iterations=1)
-
-        # cv2.imshow('Erosion', new_image)
-
-        # plt.imshow(new_image)
-        # plt.show()
-        
         if self.UseClassifier == "KNN":
-            return self.KnnClassifier.Predict(new_image)
+            return self.KnnClassifier.Predict(new_image1)
         elif self.UseClassifier == "NN":
             return self.NNClassifier.predict(new_image.reshape(1, -1))
 

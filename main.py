@@ -13,9 +13,13 @@ from knn import *
 train_x = train_x / 255.
 test_x = test_x / 255.
 
+# for x in train_x[train_labels == 7]:
+#     plt.imshow(x)
+#     plt.show()
+
 def GetMnist(dataSize = -1):
     global train_x, train_labels, test_x, test_labels
-    
+
     if dataSize == -1:
         train_all = np.concatenate((train_x, test_x))
         labels_all = np.concatenate((train_labels, test_labels))
@@ -44,12 +48,15 @@ def TestKnn(classifier, test_x, test_labels, newK = 0, show_time = True):
     print("Success rate:", str(percentage) + '%', "    k = ", classifier.k)
     return percentage
 
-def FindBestK(classifier, test_x, test_labels, show_time = True):
-    ks = [k for k in range(1, 31, 2)]
+def FindBestK(classifier, test_x, test_labels, rang = (1, 31), show_time = True):
+    ks = list(range(rang[0], rang[1], 2))
     percs = []
     for k in ks:
-        percs.append(TestKnn(classifier, test_x, test_labels, newK = k))
-        
+        perc = TestKnn(classifier, test_x, test_labels, newK = k)
+        percs.append(perc)
+    
+    plt.plot(ks, percs)
+    plt.show()
     return ks[percs.index(max(percs))]
 
 
@@ -84,15 +91,15 @@ def Main():
 
     #Finding the best K for the KNN algorithm
     cl = Knn(data, labels, Testing=True)
-    TestKnn(cl, test_data[:200], test_labels[:200])
+    #TestKnn(cl, test_data[:200], test_labels[:200])
     
-    #FindBestK(cl, test_data, test_labels)
+    FindBestK(cl, test_data[:100], test_labels[:100], rang=(1, 9))
 
     #Testing a Neural Network
-    TestNN(data, labels, test_data, test_labels, load=True)
+    #TestNN(data, labels, test_data, test_labels, load=True)
 
 def UseGUI():
     gui = GUI()
 
 if __name__ == "__main__":
-    UseGUI()
+    Main()
