@@ -4,7 +4,7 @@ from keras.datasets import mnist
 import time
 from PIL import Image
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import plot_confusion_matrix
+from sklearn.metrics import plot_confusion_matrix, classification_report
 import joblib
 from guiCanvas import *
 from knn import *
@@ -12,10 +12,6 @@ from knn import *
 (train_x, train_labels), (test_x, test_labels) = mnist.load_data()
 train_x = train_x / 255.
 test_x = test_x / 255.
-
-# for x in train_x[train_labels == 7]:
-#     plt.imshow(x)
-#     plt.show()
 
 def GetMnist(dataSize = -1):
     global train_x, train_labels, test_x, test_labels
@@ -80,7 +76,8 @@ def TestNN(train_x, train_labels, test_x, test_labels, load = False):
     score = NN.score(test_x, test_labels)
     print("Success rate: ", score)
 
-        
+    predicted = NN.predict(test_x)
+    print(classification_report(test_labels, predicted))
     plot_confusion_matrix(NN, test_x, test_labels, values_format="d", cmap="Blues")
     plt.show()
     
@@ -90,13 +87,13 @@ def Main():
     (test_data, test_labels) = GetMnist('test')
 
     #Finding the best K for the KNN algorithm
-    cl = Knn(data, labels, Testing=True)
+    #cl = Knn(data, labels, Testing=True)
     #TestKnn(cl, test_data[:200], test_labels[:200])
     
-    FindBestK(cl, test_data[:100], test_labels[:100], rang=(1, 9))
+    #FindBestK(cl, test_data[:100], test_labels[:100], rang=(1, 9))
 
     #Testing a Neural Network
-    #TestNN(data, labels, test_data, test_labels, load=True)
+    TestNN(data, labels, test_data, test_labels, load=True)
 
 def UseGUI():
     gui = GUI()

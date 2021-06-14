@@ -1,5 +1,4 @@
 from tkinter import *
-from time import sleep
 from PIL import Image, ImageDraw, ImageFilter
 from main import *
 import cv2
