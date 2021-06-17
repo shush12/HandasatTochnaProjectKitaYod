@@ -4,7 +4,7 @@ from keras.datasets import mnist
 import time
 from PIL import Image
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import plot_confusion_matrix, classification_report
+from sklearn.metrics import plot_confusion_matrix, classification_report, confusion_matrix
 import joblib
 from guiCanvas import *
 from knn import *
@@ -24,27 +24,33 @@ def GetMnist(dataSize = -1):
         return (train_x, train_labels)
     elif dataSize == 'test':
         return (test_x, test_labels)
-    else:
-        return (train_x[:dataSize], train_labels[:dataSize]), (test_x[:dataSize], test_labels[:dataSize])
 
 
-def TestKnn(classifier, test_x, test_labels, newK = 0, show_time = True):
+def TestKnn(classifier, test_x, test_labels, newK = 0):
     if newK != 0:
         classifier.SetK(newK)
-        
-    if show_time:
-        start_time = time.time()
-        
-    percentage = [True for (image, label) in zip(test_x, test_labels) if classifier.Predict(image) == label].count(True) / len(test_x) * 100
+             
+    predicted = [classifier.Predict(t) for t in test_x]
+    percentage = len([True for (p, label) in zip(predicted, test_labels) if p == label]) / len(test_x) * 100
 
-    if show_time:
-        end_time = time.time()
-        print("The process took: ", end_time - start_time, "seconds.")
+    print(classification_report(test_labels, predicted))
+    
+    mat = confusion_matrix(test_labels, predicted)
+    
+    plt.matshow(mat, cmap="Blues")
+    plt.colorbar()
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    for i in range(mat.shape[0]):
+        for j in range(mat.shape[1]):
+            plt.text(j, i, mat[i, j], ha='center', va='center')
 
-    print("Success rate:", str(percentage) + '%', "    k = ", classifier.k)
+
+    plt.show()
+
     return percentage
 
-def FindBestK(classifier, test_x, test_labels, rang = (1, 31), show_time = True):
+def FindBestK(classifier, test_x, test_labels, rang = (1, 31)):
     ks = list(range(rang[0], rang[1], 2))
     percs = []
     for k in ks:
@@ -65,7 +71,7 @@ def TestNN(train_x, train_labels, test_x, test_labels, load = False):
     test_x = test_x.reshape((samples, nx * ny))
 
     if not(load):
-        NN = MLPClassifier(hidden_layer_sizes = (24, 24), activation = 'logistic')
+        NN = MLPClassifier(hidden_layer_sizes = (150, 150), activation = 'logistic')
         NN.fit(train_x, train_labels)
         joblib.dump(NN, 'NN.joblib')
 
@@ -87,10 +93,10 @@ def Main():
     (test_data, test_labels) = GetMnist('test')
 
     #Finding the best K for the KNN algorithm
-    #cl = Knn(data, labels, Testing=True)
-    #TestKnn(cl, test_data[:200], test_labels[:200])
+    # cl = Knn(data, labels, Testing=True)
+    # TestKnn(cl, test_data, test_labels)
     
-    #FindBestK(cl, test_data[:100], test_labels[:100], rang=(1, 9))
+    # FindBestK(cl, test_data[:100], test_labels[:100], rang=(1, 9))
 
     #Testing a Neural Network
     TestNN(data, labels, test_data, test_labels, load=True)

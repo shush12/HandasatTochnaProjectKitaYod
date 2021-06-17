@@ -22,7 +22,7 @@ class GUI:
         self.KnnClassifier = Knn(data, self.labels, Testing=False)
         
         # Creating a Neural Netwok classifier using Scikit Learn
-        self.NNClassifier = MLPClassifier(max_iter=300, hidden_layer_sizes = (12, 12), activation = 'logistic')
+        self.NNClassifier = MLPClassifier(max_iter=200, hidden_layer_sizes = (150, 150), activation = 'logistic')
         self.NNClassifier.n_outputs_ = 10
         
         f, nx, ny = data.shape
@@ -86,20 +86,29 @@ class GUI:
         self.lab['text'] = "Prediction: " + str(guess) 
 
     def makeAGuess(self):
-        new_image = cv2.imread('Number.png')
-        new_image = cv2.dilate(new_image, np.ones((5, 5), np.uint8), iterations=1)
-        new_image = cv2.resize(new_image, (28, 28))
-        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
-        # cv2.imshow('What the alorithm sees', new_image)
+        # קורא את התמונה שנכתבה בפעולה הקודמת
+        img = cv2.imread('Number.png')
+        
+        # מעבה את הפיקסלים הלבנים שבתמונה
+        img = cv2.dilate(img, np.ones((5, 5), np.uint8), iterations=1)
+        
+        # משנה את הגודל של התמונה ל28 על 28 פיקסלים
+        img = cv2.resize(img, (28, 28))
+        
+        # ממיר את התמונה לתמונה בשחור לבן בלבד
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # מנרמל את ערכי התמונה
+        fin = img.reshape(1, -1) / 255.
 
-        img_arr = np.asarray(self.image.resize((28, 28)).convert('L')) / 255.
-        new_image1 = np.zeros(img_arr.shape)  
-        new_image1 = img_arr ** (1 / float(10))
+        # הופך את הפיקסלים לבהירים יותר
+        fin = fin ** (1 / float(7))
 
+        # מכניס את התמונות לפעולת החיזוי
         if self.UseClassifier == "KNN":
-            return self.KnnClassifier.Predict(new_image1)
+            return self.KnnClassifier.Predict(fin)
         elif self.UseClassifier == "NN":
-            return self.NNClassifier.predict(new_image.reshape(1, -1))
+            return self.NNClassifier.predict(fin)
 
     def LoadNN(self, event):
         self.NNClassifier = joblib.load("NN.joblib")
@@ -119,6 +128,7 @@ class GUI:
             self.NNClassifier.fit(self.data_reshaped, self.labels)
             self.but2['text'] = "Use NN"
             self.NNTrained = True
+            self.but4.pack_forget()
         else:
             self.UseClassifier = "NN"
             self.setClassifier('NN')
